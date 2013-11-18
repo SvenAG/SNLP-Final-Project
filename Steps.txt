@@ -1,0 +1,6 @@
+Try k-means and determine Alchemy categories for unclassified enteries
+
+
+Static Number Features
+BoilerPlate Test	-tf-idf
+Raw Content
