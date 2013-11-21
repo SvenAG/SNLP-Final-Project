@@ -10,15 +10,15 @@ Error Analysis
 Classification
 - Implement SVM
 - Random Forests
-- Grid Search to find best Features
+- Grid Search to find best Features - Aditya
 
 Categories
-- Use Alchemy as Ground-Truth
-- Try to find features for category classification
+- Use Alchemy as Ground-Truth - Sven
+- Try to find features for category classification - Sven
 
 Raw Content
-- Extract HTML Tags
-- Lookup: How do search-engines use HTML tags for rating websites
+- Extract HTML Tags - Danilo, Robert
+- Lookup: How do search-engines use HTML tags for rating websites - Danilo
 
 NLP
 - Use n-gram models
