@@ -1,5 +1,5 @@
 DONE
-Static Number Features - DONE 
+Static Number Features - DONE  - Improve with GridSearchCV
 BoilerPlate Test	-tf-idf - DONE
 
 TO DO:
