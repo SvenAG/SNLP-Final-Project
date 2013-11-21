@@ -1,9 +1,30 @@
+DONE
+Static Number Features - DONE 
+BoilerPlate Test	-tf-idf - DONE
+
+TO DO:
+
+Classification
+- Implement SVM
+- Random Forests
+- Grid Search to find best Features
+
+Categories
+- Use Alchemy as Ground-Truth
+- Try to find features for category classification
+
+Raw Content
+- Extract HTML Tags
+- Lookup: How do search-engines use HTML tags for rating websites
+
+NLP
+- Use n-gram models
+- POS TAGS - Figure out how to use them
+- Dependency Parser - Dependencies between words
+
+
+IDEAS:
 Try k-means and determine Alchemy categories for unclassified enteries
 
-
-Static Number Features
-BoilerPlate Test	-tf-idf
-Raw Content
-
-
+BACKGROUND:
 Read over: TF-IDF, logistic regression, random forests, Support Vector Machines
