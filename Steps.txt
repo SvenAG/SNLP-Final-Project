@@ -4,6 +4,9 @@ BoilerPlate Test	-tf-idf - DONE
 
 TO DO:
 
+Error Analysis
+
+
 Classification
 - Implement SVM
 - Random Forests
