@@ -22,7 +22,7 @@ Raw Content
 
 NLP
 - Use n-gram models
-- POS TAGS - Figure out how to use them
+- POS TAGS - Figure out how to use them - Danilo
 - Dependency Parser - Dependencies between words
 
 
