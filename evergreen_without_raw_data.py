@@ -12,14 +12,14 @@ import pandas as p
 import numpy as np
 import scipy as sp
 import pylab as pl
-from sklearn import linear_model, cross_validation, metrics 
+from sklearn import linear_model, cross_validation, metrics
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
-modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
 
 
@@ -70,13 +70,13 @@ training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
 # Models
 # ----------------------------------------------------------
 if modelType == "notext":
-    X = training_data[:,list([3, 5, 15, 16, 17, 20, 22])]
+    X = training_data[:,list([6, 8, 9, 19, 22, 25])]
 
     lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
 elif modelType == "boilerplate_counter":
     X = training_data[:,2]
-    
+
     counter = CountVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), stop_words=None)
     counter.fit(X)
     X = counter.transform(X)
@@ -85,12 +85,12 @@ elif modelType == "boilerplate_counter":
 
 elif modelType == "boilerplate_tfidf":
     X = training_data[:,2]
-    
+
     tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
     tfidf.fit(X)
     X = tfidf.transform(X)
 
     lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
-    
 
-print "\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
+
+print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
