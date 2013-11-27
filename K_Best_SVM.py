@@ -20,7 +20,7 @@ modelType = "notext"
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('F:/NYC/NYU/SM/3/SNLP/Project/Data/train.tsv'))
+training_data = np.array(p.read_table('../data/train.tsv'))
 print ("Read Data\n")
 
 # get the target variable and set it as Y so we can predict it
