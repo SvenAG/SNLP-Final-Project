@@ -16,10 +16,15 @@ from sklearn import linear_model, cross_validation, metrics
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn import svm, datasets
+import pylab as pl
+
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
-modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
 
 
@@ -92,5 +97,29 @@ elif modelType == "boilerplate_tfidf":
 
     lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-
 print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+
+# ----------------------------------------------------------
+# Errors Analysis - Confusion matrix
+# Does not use cross validation, but split the training set into train and test
+# ----------------------------------------------------------
+
+# Split the data into a training set and a test set
+X_train, X_test, y_train, y_test = train_test_split(X, Y , random_state=0)
+
+# Run classifier
+y_pred = lr.fit(X_train, y_train).predict(X_test)
+y_test = map(int,y_test)
+y_pred = map(int,y_pred)
+
+# Compute confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print cm
+
+#pretty-print
+pl.matshow(cm)
+pl.title('Confusion matrix')
+pl.colorbar()
+pl.ylabel('True label')
+pl.xlabel('Predicted label')
+pl.show()
