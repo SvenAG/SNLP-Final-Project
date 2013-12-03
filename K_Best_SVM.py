@@ -82,5 +82,5 @@ if modelType == "notext":
 #    rfecv.support_
     print ("Optimal Number of features : %d" % rfecv.n_features_)
     savetxt('rfecv.csv', rfecv.ranking_, delimiter=',', fmt='%f')
-    savetxt('transformedtrain.tsv', X, delimiter=',', fmt='%f')
+#    savetxt('transformedtrain.tsv', X, delimiter=',', fmt='%f')
     exit()
