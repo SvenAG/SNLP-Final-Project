@@ -20,13 +20,14 @@ from sklearn.cross_validation import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn import svm, datasets
 import pylab as pl
+import random
 
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
 modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
-
+error_analysis = True                   # print confusion matrix
 
 # ----------------------------------------------------------
 # Prepare the Data
@@ -43,7 +44,7 @@ testing_data = np.array(p.read_table('../data/test.tsv'))
 # 6 => "commonlinkratio_1"        13 => "frameTagRatio"        20 => "news_front_page"
 
 # get the target variable and set it as Y so we can predict it
-Y = training_data[:,-1]
+# Y = training_data[:,-1]
 
 # not all data is numerical, so we'll have to convert those fields
 # fix "is_news":
@@ -70,56 +71,67 @@ training_data[:,3] = [11 if x=="unknown" else x for x in training_data[:,3]]
 training_data[:,3] = [12 if x=="weather" else x for x in training_data[:,3]]
 training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
 
+for category in range(0,13) :
+    w = list(np.where( training_data[:,3] == category )[0])
+    training_data_temp = training_data
+    training_data = training_data[w,:]
+    Y = training_data[:,-1]
+    
+    # print training_data
+    # ----------------------------------------------------------
+    # Models
+    # ----------------------------------------------------------
+    if modelType == "notext":
+        X = training_data[:,list([6, 8, 9, 19, 22, 25])]
 
-# ----------------------------------------------------------
-# Models
-# ----------------------------------------------------------
-if modelType == "notext":
-    X = training_data[:,list([6, 8, 9, 19, 22, 25])]
+        lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
-    lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
+    elif modelType == "boilerplate_counter":
+        X = training_data[:,2]
 
-elif modelType == "boilerplate_counter":
-    X = training_data[:,2]
+        counter = CountVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), stop_words=None)
+        counter.fit(X)
+        X = counter.transform(X)
 
-    counter = CountVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), stop_words=None)
-    counter.fit(X)
-    X = counter.transform(X)
+        lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    elif modelType == "boilerplate_tfidf":
+        X = training_data[:,2]
+        tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
+        tfidf.fit(X)
+        X = tfidf.transform(X)
 
-elif modelType == "boilerplate_tfidf":
-    X = training_data[:,2]
+        lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
-    tfidf.fit(X)
-    X = tfidf.transform(X)
+    print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+    print ("\nModel Type: ", modelType, "\nROC AUC: ", cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
 
-    lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    # ----------------------------------------------------------
+    # Errors Analysis - Confusion matrix
+    # Does not use cross validation, but split the training set into train and test
+    # ----------------------------------------------------------
 
-print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+    if error_analysis :
+        # Split the data into a training set and a test set
+        X_train, X_test, y_train, y_test = train_test_split(X, Y ,  test_size= (1.0/cv_folds),  random_state=0)
+        
+        # Run classifier
+        y_pred = lr.fit(X_train, y_train).predict(X_test)
+        y_test = map(int,y_test)
+        y_pred = map(int,y_pred)
 
-# ----------------------------------------------------------
-# Errors Analysis - Confusion matrix
-# Does not use cross validation, but split the training set into train and test
-# ----------------------------------------------------------
+        # Compute confusion matrix
+        cm = confusion_matrix(y_test, y_pred)
+        print cm
 
-# Split the data into a training set and a test set
-X_train, X_test, y_train, y_test = train_test_split(X, Y , random_state=0)
-
-# Run classifier
-y_pred = lr.fit(X_train, y_train).predict(X_test)
-y_test = map(int,y_test)
-y_pred = map(int,y_pred)
-
-# Compute confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-print cm
-
-#pretty-print
-pl.matshow(cm)
-pl.title('Confusion matrix')
-pl.colorbar()
-pl.ylabel('True label')
-pl.xlabel('Predicted label')
-pl.show()
+        #pretty-print
+        # pl.matshow(cm)
+        # pl.title('Confusion matrix')
+        # pl.colorbar()
+        # pl.ylabel('True label')
+        # pl.xlabel('Predicted label')
+        # pl.show()
+        
+        #confusion matrix separeted by category
+        training_data = training_data_temp 
+    
