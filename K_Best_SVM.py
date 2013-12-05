@@ -76,12 +76,12 @@ if modelType == "notext":
     #svc = SVC(kernel = "linear")
     lmodel = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
-    rfecv = RFECV(estimator = lmodel, step=2, verbose = 1)
+    rfecv = RFECV(estimator = lmodel, step=1, verbose = 1)
     print("Initialized RFECV\n")
     X = rfecv.fit(X,Y)
 #    print("Fitted train data and label\n")
 #    rfecv.support_
     print ("Optimal Number of features : %d" % rfecv.n_features_)
     savetxt('rfecv.csv', rfecv.ranking_, delimiter=',', fmt='%f')
-#    savetxt('transformedtrain.tsv', X, delimiter=',', fmt='%f')
+    savetxt('transformedtrain.tsv', X, delimiter=',', fmt='%f')
     exit()

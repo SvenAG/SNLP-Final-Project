@@ -25,14 +25,14 @@ import random
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
-modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
 error_analysis = True                   # print confusion matrix
 
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train_updated.tsv'))
+training_data = np.array(p.read_table('../data/train.tsv'))
 testing_data = np.array(p.read_table('../data/test.tsv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
@@ -83,7 +83,8 @@ for category in range(0,13) :
     # ----------------------------------------------------------
     if modelType == "notext":
         #X = training_data[:,list([6, 8, 9, 19, 22, 25])]
-        X = training_data[:,list([15, 19, 21, 22, 23])]
+        #X = training_data[:,list([15, 19, 21, 22, 23])]
+        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
 
         lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
@@ -123,7 +124,7 @@ for category in range(0,13) :
 
         # Compute confusion matrix
         cm = confusion_matrix(y_test, y_pred)
-        print cm
+        print (cm)
 
         #pretty-print
         # pl.matshow(cm)
