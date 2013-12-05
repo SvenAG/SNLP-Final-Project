@@ -25,15 +25,15 @@ import random
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
-modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+modelType = "kMeans"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
 error_analysis = True                   # print confusion matrix
 
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train.tsv'))
-testing_data = np.array(p.read_table('../data/test.tsv'))
+training_data = np.array(p.read_table('../data/train.csv'))
+testing_data = np.array(p.read_table('../data/test.csv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
 # 1 => "urlid"                     8 => "commonlinkratio_3"    15 => "html_ratio"          22 => "numberOfLinks"
@@ -102,6 +102,18 @@ for category in range(0,13) :
         X = tfidf.transform(X)
 
         lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+
+    elif modelType == "kMeans":
+        X = training_data[:,2]
+        tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
+        tfidf.fit(X)
+        X = tfidf.transform(X)
+
+        labeler = kMeans(k=10)
+        labeler.fit(X.tocsr())
+
+        for (row, label) in enumerate(labeler.labels_):   
+            print "row %d has label %d"%(row, label)  
 
     print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
     print ("\nModel Type: ", modelType, "\nROC AUC: ", cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
