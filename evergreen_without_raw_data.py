@@ -32,7 +32,7 @@ error_analysis = True                   # print confusion matrix
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train.tsv'))
+training_data = np.array(p.read_table('../data/train_updated.tsv'))
 testing_data = np.array(p.read_table('../data/test.tsv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
@@ -76,13 +76,14 @@ for category in range(0,13) :
     training_data_temp = training_data
     training_data = training_data[w,:]
     Y = training_data[:,-1]
-    
+
     # print training_data
     # ----------------------------------------------------------
     # Models
     # ----------------------------------------------------------
     if modelType == "notext":
-        X = training_data[:,list([6, 8, 9, 19, 22, 25])]
+        #X = training_data[:,list([6, 8, 9, 19, 22, 25])]
+        X = training_data[:,list([15, 19, 21, 22, 23])]
 
         lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
@@ -114,7 +115,7 @@ for category in range(0,13) :
     if error_analysis :
         # Split the data into a training set and a test set
         X_train, X_test, y_train, y_test = train_test_split(X, Y ,  test_size= (1.0/cv_folds),  random_state=0)
-        
+
         # Run classifier
         y_pred = lr.fit(X_train, y_train).predict(X_test)
         y_test = map(int,y_test)
@@ -131,7 +132,6 @@ for category in range(0,13) :
         # pl.ylabel('True label')
         # pl.xlabel('Predicted label')
         # pl.show()
-        
+
         #confusion matrix separeted by category
-        training_data = training_data_temp 
-    
+        training_data = training_data_temp

@@ -20,7 +20,7 @@ modelType = "notext"
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train.tsv'))
+training_data = np.array(p.read_table('../data/train_updated.tsv'))
 print ("Read Data\n")
 
 # get the target variable and set it as Y so we can predict it
@@ -64,7 +64,7 @@ print ("Corrected outliers data\n")
 if modelType == "notext":
     print ("no text model\n")
     #ignore features which are useless
-    X = training_data[:,list([3, 5, 6, 7, 8, 9, 10, 14, 15, 16, 17, 19, 20, 22, 25])]
+    X = training_data[:,list([3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])]
 #    X = array([x[1:] for x in X])
 #    Y = array(Y)
     scaler = preprocessing.StandardScaler()
@@ -73,9 +73,10 @@ if modelType == "notext":
     print("fitted train data and labels\n")
     X = scaler.transform(X)
     print("Transformed train data\n")
-    svc = SVC(kernel = "linear")
-    print("Initialized SVM\n")
-    rfecv = RFECV(estimator = svc, cv = 5, step=1, verbose = 1)
+    #svc = SVC(kernel = "linear")
+    lmodel = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
+
+    rfecv = RFECV(estimator = lmodel, step=2, verbose = 1)
     print("Initialized RFECV\n")
     X = rfecv.fit(X,Y)
 #    print("Fitted train data and label\n")
