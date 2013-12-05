@@ -6,7 +6,7 @@ import json
 alchemyapi = AlchemyAPI()
 
 p = open('uncategorized_new','rb')
-n = open('categorized_new','w') 
+n = open('categorized_new_test','w') 
 
 q = p.read()
 
@@ -16,8 +16,9 @@ q = q.split('\n')
 for i in range (1600,len(q)):
 
 	url = q[i].split(" ")[0]
+	url_id = q[i].split(" ")[1]
 
-	print(i,": ",url)
+	print(i,": ",url,' ',url_id)
 
 	try:
 		response = alchemyapi.category('url',url)
@@ -26,7 +27,7 @@ for i in range (1600,len(q)):
 			print('## Response Object ##')
 			print(json.dumps(response, indent=4))
 
-			n.write(response['url']+'\t'+response['category']+'\t'+response['score']+'\n')
+			n.write(url+'\t'+response['category']+'\t'+response['score']+'\t'+url_id+'\n')
 			print('')
 			print('## Category ##')
 			print('text: ', response['category'])
