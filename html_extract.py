@@ -8,7 +8,7 @@ from unidecode import unidecode
 from boilerpipe.extract import Extractor
 from bs4 import BeautifulSoup
 
-tags = ['title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img']
+tags = ['title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'p']
 
 def main():
     training_data = np.array(p.read_table('../data/train.tsv'))
@@ -16,7 +16,7 @@ def main():
 
     all_data = np.vstack([training_data[:,0:26], testing_data])
 
-    output = file('../data/html_extracted.json', 'w')
+    output = file('../data/html_extracted_p.json', 'w')
 
     for i, page in enumerate(all_data):
         if i != -1:
@@ -34,6 +34,8 @@ def main():
             with file(raw_file, 'rb') as f:
                 content = f.read()
                 soup = BeautifulSoup(content, 'lxml')
+
+            extracted['url'] = page[0]
 
             # boilerplate is json, we don't want the url, just title and body, so lets parse it
             boilerplate = json.loads(page[2])
