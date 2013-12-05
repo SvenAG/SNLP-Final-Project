@@ -25,7 +25,7 @@ import random
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
-modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
 cv_folds = 10                           # number of cross validation folds
 error_analysis = True                   # print confusion matrix
 

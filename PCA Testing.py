@@ -92,25 +92,16 @@ elif modelType == "boilerplate_tfidf":
     X = training_data[:,2]
     print(X.shape)
     print(Y.shape)
-    #WHERE IS REMOVAL OF STOP WORDS!!??
-    #LOWERCASE, NORMALIZE,
-    #2 EXTRA FEATURES, NUMBER OF UNIQUE WORDS IN TITLE, BODY
 
     tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
     tfidf.fit(X)
     X = tfidf.transform(X)
     print(X.shape)          #7395 * 91629
 
-    #sparsePCA = decomposition.SparsePCA(n_components=10000, alpha=0.8, ridge_alpha=0.01, max_iter=1000, tol=1e-08, method='lars', n_jobs=1);
-    #sparsePCA.fit(X)
-    #X = sparsePCA.transform(X)
-    #print(X.shape)
-
-    truncatedSVD = decomposition.TruncatedSVD(n_components=100, algorithm='randomized', n_iterations=5)
+    truncatedSVD = decomposition.TruncatedSVD(n_components=100, algorithm='randomized', n_iterations=5)  #Won't run for 1000
     truncatedSVD.fit(X)
     X = truncatedSVD.transform(X)
     print(X.shape)
-    i = input("lets see what we got here")
     lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
 print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
