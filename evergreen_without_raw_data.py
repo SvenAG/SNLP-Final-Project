@@ -32,7 +32,7 @@ error_analysis = True                   # print confusion matrix
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train.tsv'))
+training_data = np.array(p.read_table('../data/train_updated.tsv'))
 testing_data = np.array(p.read_table('../data/test.tsv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
