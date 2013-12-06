@@ -7,8 +7,16 @@ import pandas as p
 from unidecode import unidecode
 from boilerpipe.extract import Extractor
 from bs4 import BeautifulSoup
+import nltk
 
 tags = ['title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'p']
+
+def visible_text(element):
+    if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+        return ''
+    result = re.sub('<!--.*-->|\r|\n', '', str(element), flags=re.DOTALL)
+    result = re.sub('\s{2,}|&nbsp;', ' ', result)
+    return result
 
 def main():
     training_data = np.array(p.read_table('../data/train.tsv'))
@@ -16,7 +24,7 @@ def main():
 
     all_data = np.vstack([training_data[:,0:26], testing_data])
 
-    output = file('../data/html_extracted_p.json', 'w')
+    output = file('../data/html_extracted_url.json', 'w')
 
     for i, page in enumerate(all_data):
         if i != -1:
@@ -35,7 +43,9 @@ def main():
                 content = f.read()
                 soup = BeautifulSoup(content, 'lxml')
 
-            extracted['url'] = page[0]
+            url = page[0]
+            url = re.sub(r"[./\\:]", ' ', url)
+            extracted['url'] = [url]
 
             # boilerplate is json, we don't want the url, just title and body, so lets parse it
             boilerplate = json.loads(page[2])
@@ -122,6 +132,8 @@ def clean(incoming):
     incoming = re.sub(r"\s+", ' ', incoming)
     incoming = incoming.strip()
     return incoming
+
+
 
 if __name__ == "__main__":
     main()
