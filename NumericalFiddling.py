@@ -85,10 +85,10 @@ def main():
 #        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
  #       X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
 #for SVM
-        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
-        X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+        #X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+        #X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
 #for log rfecv
-        #X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
+        X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
         #X_test = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
 
 
@@ -123,8 +123,8 @@ def main():
 
         lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    #print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
-    print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(svc, X, Y, cv=cv_folds, scoring='roc_auc')))
+    print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+
 
     #roc_plotter(X, Y)
 
