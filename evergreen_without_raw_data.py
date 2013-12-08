@@ -22,6 +22,10 @@ from sklearn import svm, datasets
 import pylab as pl
 import random
 
+from sklearn.cross_validation import KFold
+from sklearn.metrics import *
+import copy
+
 # ----------------------------------------------------------
 # Settings
 # ----------------------------------------------------------
@@ -32,7 +36,10 @@ error_analysis = True                   # print confusion matrix
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train_updated.tsv'))
+# training_data = np.array(p.read_table('../data/train_updated.tsv'))
+# testing_data = np.array(p.read_table('../data/test.tsv'))
+
+training_data = np.array(p.read_table('../data/train.tsv'))
 testing_data = np.array(p.read_table('../data/test.tsv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
@@ -71,68 +78,99 @@ training_data[:,3] = [11 if x=="unknown" else x for x in training_data[:,3]]
 training_data[:,3] = [12 if x=="weather" else x for x in training_data[:,3]]
 training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
 
-for category in range(0,13) :
-    w = list(np.where( training_data[:,3] == category )[0])
-    training_data_temp = training_data
-    training_data = training_data[w,:]
-    Y = training_data[:,-1]
+# w = list(np.where( training_data[:,3] == category )[0])
+# training_data_temp = training_data
+# training_data = training_data[w,:]
+Y = training_data[:,-1]
 
-    # print training_data
-    # ----------------------------------------------------------
-    # Models
-    # ----------------------------------------------------------
-    if modelType == "notext":
-        #X = training_data[:,list([6, 8, 9, 19, 22, 25])]
-        #X = training_data[:,list([15, 19, 21, 22, 23])]
-        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
+# ----------------------------------------------------------
+# Models
+# ----------------------------------------------------------
+if modelType == "notext":
+    #X = training_data[:,list([6, 8, 9, 19, 22, 25])]
+    #X = training_data[:,list([15, 19, 21, 22, 23])]
+    X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
 
-        lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
+    lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
-    elif modelType == "boilerplate_counter":
-        X = training_data[:,2]
+elif modelType == "boilerplate_counter":
+    X = training_data[:,2]
 
-        counter = CountVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), stop_words=None)
-        counter.fit(X)
-        X = counter.transform(X)
+    counter = CountVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), stop_words=None)
+    counter.fit(X)
+    X = counter.transform(X)
 
-        lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    elif modelType == "boilerplate_tfidf":
-        X = training_data[:,2]
-        tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
-        tfidf.fit(X)
-        X = tfidf.transform(X)
+elif modelType == "boilerplate_tfidf":
+    X = training_data[:,2]
+    tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
+    tfidf.fit(X)
+    X = tfidf.transform(X)
 
-        lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
-    print ("\nModel Type: ", modelType, "\nROC AUC: ", cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
+print ("\nModel Type: ", modelType, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+print ("\nModel Type: ", modelType, "\nROC AUC: ", cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
 
-    # ----------------------------------------------------------
-    # Errors Analysis - Confusion matrix
-    # Does not use cross validation, but split the training set into train and test
-    # ----------------------------------------------------------
 
-    if error_analysis :
-        # Split the data into a training set and a test set
-        X_train, X_test, y_train, y_test = train_test_split(X, Y ,  test_size= (1.0/cv_folds),  random_state=0)
+# print "scoremean = " , (mean / cv_folds)
+    
+# ----------------------------------------------------------
+# Errors Analysis - Confusion matrix
+# Does not use cross validation, but split the training set into train and test
+# ----------------------------------------------------------
 
-        # Run classifier
+if error_analysis :
+    
+    tot_y_pred = []
+    tot_y_test = []
+    
+    category_y_pred = [ [] for x in range(0,13) ]
+    category_y_test = [ [] for x in range(0,13) ]
+    
+    # Kfold creates an iterator for each step in the cross validation
+    kf = KFold(len(Y), n_folds = cv_folds, indices=False) #iterates over all steps of the cross validation
+    for train, test in kf:
+        X_train, X_test, y_train, y_test = X[train], X[test], Y[train], Y[test]
+        categories = training_data[test , 3]
+        
+        # question: can we fit and predict over different data using the same linear model? 
+        # or should we copy the original linear model?
         y_pred = lr.fit(X_train, y_train).predict(X_test)
+        for category in range(0,13) :
+            index = np.where(categories == category)
+            for ele in y_pred[index].tolist() : 
+                category_y_pred[category].append(ele)
+                tot_y_pred.append(ele)
+            for ele in y_test[index].tolist() :
+                category_y_test[category].append(ele)
+                tot_y_test.append(ele)
+    
+    #prints confusion matrix for each category
+    for category in range(0,13) :          
+        y_test = np.array( category_y_pred[category] )
+        y_pred = np.array( category_y_test[category] )
         y_test = map(int,y_test)
         y_pred = map(int,y_pred)
-
-        # Compute confusion matrix
         cm = confusion_matrix(y_test, y_pred)
+        print ("category = " , category )
         print (cm)
 
-        #pretty-print
-        # pl.matshow(cm)
-        # pl.title('Confusion matrix')
-        # pl.colorbar()
-        # pl.ylabel('True label')
-        # pl.xlabel('Predicted label')
-        # pl.show()
+    # Compute confusion matrix for all data
+    tot_y_test = np.array( tot_y_test )
+    tot_y_pred = np.array( tot_y_pred )
+    tot_y_test = map(int,tot_y_test)
+    tot_y_pred = map(int,tot_y_pred)
 
-        #confusion matrix separeted by category
-        training_data = training_data_temp
+    cm = confusion_matrix(tot_y_test, tot_y_pred)
+    print ("all data confusion matrix")
+    print (cm)
+
+    # pretty-print
+    pl.matshow(cm)
+    pl.title('Confusion matrix')
+    pl.colorbar()
+    pl.ylabel('True label')
+    pl.xlabel('Predicted label')
+    pl.show()
