@@ -65,6 +65,7 @@ if modelType == "notext":
     print ("no text model\n")
     #ignore features which are useless
     X = training_data[:,list([3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25])]
+
 #    X = array([x[1:] for x in X])
 #    Y = array(Y)
     scaler = preprocessing.StandardScaler()
@@ -73,15 +74,14 @@ if modelType == "notext":
     print("fitted train data and labels\n")
     X = scaler.transform(X)
     print("Transformed train data\n")
-    #svc = SVC(kernel = "linear")
-    lmodel = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
+    svc = SVC(kernel = "linear")
+    #lmodel = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
-    rfecv = RFECV(estimator = lmodel, step=1, verbose = 1)
+    rfecv = RFECV(estimator = svc, step=1, verbose = 1)
     print("Initialized RFECV\n")
     X = rfecv.fit(X,Y)
 #    print("Fitted train data and label\n")
 #    rfecv.support_
     print ("Optimal Number of features : %d" % rfecv.n_features_)
     savetxt('rfecv.csv', rfecv.ranking_, delimiter=',', fmt='%f')
-    savetxt('transformedtrain.tsv', X, delimiter=',', fmt='%f')
     exit()

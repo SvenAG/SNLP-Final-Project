@@ -17,7 +17,7 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn.metrics import roc_curve, auc, metrics
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
-
+from sklearn.svm import SVC
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn import svm, datasets
@@ -28,15 +28,15 @@ def main():
     # ----------------------------------------------------------
     # Settings
     # ----------------------------------------------------------
-    modelType = "boilerplate_tfidf"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
+    modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
     cv_folds = 10                           # number of cross validation folds
     error_analysis = True                   # print confusion matrix
-    leaderboard_test = True                 # generate output for the leaderboard
+    leaderboard_test = False                 # generate output for the leaderboard
 
     # ----------------------------------------------------------
     # Prepare the Data
     # ----------------------------------------------------------
-    training_data = npy.array(p.read_table('../data/train.tsv'))
+    training_data = npy.array(p.read_table('../data/train_updated.tsv'))
     testing_data = npy.array(p.read_table('../data/test.tsv'))
 
     all_data = npy.vstack([training_data[:,0:26], testing_data])
@@ -82,11 +82,23 @@ def main():
     Y = training_data[:,-1].astype(int)
 
     if modelType == "notext":
-        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
-        X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
+#        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
+ #       X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
+#for SVM
+        #X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+        #X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+#for log rfecv
+        X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
+        #X_test = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
+
+
+        """
+        X_all = all_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
+        X = X_all[0:training_length]
+        X_test = X_all[training_length:]"""
 
         lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
-
+        svc = SVC(kernel = "linear")
     elif modelType == "boilerplate_counter":
         X_all = all_data[:,2]
 
@@ -111,9 +123,10 @@ def main():
 
         lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    print "\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc'))
-        #print "\nModel Type: ", modelType, "\nROC AUC: ", cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')
-    roc_plotter(X, Y)
+    print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+
+
+    #roc_plotter(X, Y)
 
     if leaderboard_test:
         lr.fit(X, Y)
@@ -123,14 +136,14 @@ def main():
         predictions = p.DataFrame(data=output, columns=['urlid', 'label'])
         predictions.to_csv('../data/output.csv', index=False)
 
-def logreg(X_set, Y_set):
+def roc_plotter(X_set, Y_set):
     mean_tpr = 0.0
     mean_fpr = npy.linspace(0, 1, 100)
 
     cv = cross_validation.KFold(len(Y_set), n_folds=5)
     X_set = X_set.astype(float)
     for i, (train, test) in enumerate(cv):
-        print "Fold-%d:" % (i+1)
+        print ("Fold-%d:" % (i+1))
 
         # fit Logistic Regression model
         m1 = linear_model.LogisticRegression()
@@ -138,7 +151,7 @@ def logreg(X_set, Y_set):
         probas = m1.predict_proba(X_set[test])
         fpr, tpr, thresholds = metrics.roc_curve(Y_set[test], probas[:,1])
         roc_auc = metrics.auc(fpr, tpr)
-        print "LR: AUC=%.6f" % roc_auc
+        print ("LR: AUC=%.6f" % roc_auc)
 
         mean_tpr += scipy.interp(mean_fpr, fpr, tpr)
         mean_tpr[0] = 0.0

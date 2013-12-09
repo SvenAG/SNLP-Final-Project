@@ -32,7 +32,7 @@ error_analysis = True                   # print confusion matrix
 # ----------------------------------------------------------
 # Prepare the Data
 # ----------------------------------------------------------
-training_data = np.array(p.read_table('../data/train.tsv'))
+training_data = np.array(p.read_table('../data/train_updated.tsv'))
 testing_data = np.array(p.read_table('../data/test.tsv'))
 
 # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
@@ -75,7 +75,7 @@ training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
 # Models
 # ----------------------------------------------------------
 if modelType == "notext":
-    X = training_data[:,list([6, 8, 9, 19, 22, 25])]
+    X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
 
     lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
 
@@ -93,7 +93,7 @@ elif modelType == "boilerplate_tfidf":
     print(X.shape)
     print(Y.shape)
 
-    tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
+    tfidf = TfidfVectorizer(stop_words = 'english', min_df=2,  strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
     tfidf.fit(X)
     X = tfidf.transform(X)
     print(X.shape)          #7395 * 91629
