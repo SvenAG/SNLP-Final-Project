@@ -2,12 +2,16 @@ import re
 import json
 
 import numpy as np
+import scipy
 import pandas as p
+import pylab as pl
 
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.cross_validation import StratifiedKFold
 from sklearn import linear_model, cross_validation, metrics, ensemble
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
+from sklearn.feature_selection import RFECV
 from sklearn import decomposition
 from sklearn.feature_extraction.text import TfidfTransformer
 
@@ -22,6 +26,7 @@ def main():
 
     # which fields from the html data do we care about?
     tags = ['url', 'title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'meta_description', 'meta_keywords', 'boilerplate', 'summary']
+    #tags = ['url']
     # END SETTINGS ###################################################################
 
 
@@ -95,19 +100,58 @@ def main():
         if logisticRegressionScores:
             # fit a logistic regression for this tag
             lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+            
+            # svd with 100 components on the tfidf output
+            # truncatedSVD = decomposition.TruncatedSVD(n_components=100, algorithm='randomized', n_iterations=5)  #Won't run for 1000
+            # truncatedSVD.fit(X_all)
+            # X_all = truncatedSVD.transform(X_all)
+
+            # # seperate training and test
+            # X = X_all[0:training_length]
+            # X_test = X_all[training_length:]
+
+            X = X.astype(float)
+            Y = Y.astype(int)
+
+            # X_before_gs = np.array(X, copy=True)
+            # X_test_before_gs = np.array(X_test, copy=True)
+
+            # print "Shape of X before GS: " + str(X.shape)
+
+            # selector = RFECV(lr, step=1, cv=5)
+            # selector = selector.fit(X, Y)
+            # selected_cols = []
+            # for s, b in enumerate(selector.support_):
+            #     if b:
+            #         selected_cols.append(s)
+
+            # X = X[:,list(selected_cols)]
+            # X_test = X_test[:,list(selected_cols)]
+            
+            # print "Shape of X after GS: " + str(X.shape)
+
             lr.fit(X, Y)
             
             # get the score from the logistic regression for training and test
             if i == 0:
-                scores = np.array(lr.predict_proba(X)[:,0])
-                scores_test = np.array(lr.predict_proba(X_test)[:,0])
+                # scores = np.array(lr.predict_proba(X)[:,0])
+                # scores_test = np.array(lr.predict_proba(X_test)[:,0])
+                scores = np.array(lr.predict(X))
+                scores_test = np.array(lr.predict(X_test))
             else:
-                scores = np.vstack((scores, lr.predict_proba(X)[:,0]))
-                scores_test = np.vstack((scores_test, lr.predict_proba(X_test)[:,0]))
+                # scores = np.vstack((scores, lr.predict_proba(X)[:,0]))
+                # scores_test = np.vstack((scores_test, lr.predict_proba(X_test)[:,0]))
+                scores = np.vstack((scores, lr.predict(X)))
+                scores_test = np.vstack((scores_test, lr.predict(X_test)))
 
 
         # RANDOM FOREST
         if randomForestScores:
+            # X = X_before_gs
+            # X_test = X_test_before_gs
+
+            rf = ensemble.RandomForestClassifier(n_estimators = 500)
+
             # svd with 100 components on the tfidf output
             truncatedSVD = decomposition.TruncatedSVD(n_components=100, algorithm='randomized', n_iterations=5)  #Won't run for 1000
             truncatedSVD.fit(X_all)
@@ -117,17 +161,37 @@ def main():
             X = X_all[0:training_length]
             X_test = X_all[training_length:]
 
+            X = X.astype(float)
+            Y = Y.astype(int)
+
+            # print "Shape of X before GS: " + str(X.shape)
+
+            # selector = RFECV(rf, step=1, cv=5)
+            # selector = selector.fit(X, Y)
+            # selected_cols = []
+            # for s, b in enumerate(selector.support_):
+            #     if b:
+            #         selected_cols.append(s)
+
+            # X = X[:,list(selected_cols)]
+            # X_test = X_test[:,list(selected_cols)]
+
+            # print "Shape of X after GS: " + str(X.shape)
+
             # fit a random forest
-            rf = ensemble.RandomForestClassifier(n_estimators = 500)
             rf.fit(X,Y)
 
             # get the scores of the random forest for training and test
             if i == 0 and not logisticRegressionScores:
-                scores = np.array(rf.predict_proba(X)[:,0])
-                scores_test = np.array(rf.predict_proba(X_test)[:,0])
+                # scores = np.array(rf.predict_proba(X)[:,0])
+                # scores_test = np.array(rf.predict_proba(X_test)[:,0])
+                scores = np.array(rf.predict(X))
+                scores_test = np.array(rf.predict(X_test))
             else:
-                scores = np.vstack((scores, rf.predict_proba(X)[:,0]))
-                scores_test = np.vstack((scores_test, rf.predict_proba(X_test)[:,0]))
+                # scores = np.vstack((scores, rf.predict_proba(X)[:,0]))
+                # scores_test = np.vstack((scores_test, rf.predict_proba(X_test)[:,0]))
+                scores = np.vstack((scores, rf.predict(X)))
+                scores_test = np.vstack((scores_test, rf.predict(X_test)))
 
         print "Model " + str(i+1) + "/" + str(len(tags)) + " trained."
         print "Tag: " + tag + "\tROC AUC: ", str(np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc')))
@@ -147,12 +211,26 @@ def main():
 
     # make a new logistic regression
     lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    roc_plotter(X, Y)
     print "Model: " + "Logistic Regression" + "\tROC AUC: ", np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc'))
     # END COMBINE MODELS ###################################################################
 
 
     if leaderboard_output:
         # fit a logistic regression with the scores and output labels
+        X = X.astype(float)
+        Y = Y.astype(int)
+
+        selector = RFECV(lr, step=1, cv=5)
+        selector = selector.fit(X, Y)
+        selected_cols = []
+        for s, b in enumerate(selector.support_):
+            if b:
+                selected_cols.append(s)
+
+        X = X[:,list(selected_cols)]
+        X_test = X_test[:,list(selected_cols)]
+
         lr.fit(X, Y)
 
         # predict the test data
@@ -164,8 +242,44 @@ def main():
         predictions = p.DataFrame(data=output, columns=['urlid', 'label'])
 
         # save the output
-        predictions.to_csv('../data/output.csv', index=False)
+        predictions.to_csv('../data/output_Rlr_both100.csv', index=False)
 
+def roc_plotter(X_set, Y_set):
+    mean_tpr = 0.0
+    mean_fpr = np.linspace(0, 1, 100)
+    
+    cv = cross_validation.KFold(len(Y_set), n_folds=10)
+    X_set = X_set.astype(float)
+    for i, (train, test) in enumerate(cv):
+        print "Fold-%d:" % (i+1)
+        
+        # fit Logistic Regression model
+        m1 = linear_model.LogisticRegression()
+        m1.fit(X_set[train], Y_set[train])
+        probas = m1.predict_proba(X_set[test])
+        fpr, tpr, thresholds = metrics.roc_curve(Y_set[test], probas[:,1])
+        roc_auc = metrics.auc(fpr, tpr)
+        print "LR: AUC=%.6f" % roc_auc
+            
+        mean_tpr += scipy.interp(mean_fpr, fpr, tpr)
+        mean_tpr[0] = 0.0
+        
+        w = np.where(np.array(Y_set[test] == True))
+    
+    
+
+    mean_tpr /= len(cv)
+    mean_auc = metrics.auc(mean_fpr, mean_tpr)*100
+    pl.plot(mean_fpr, mean_tpr, 'k-', label='ROC (area = %0.2f)' % mean_auc, lw=2)
+    
+    pl.xlim([-0.05, 1.05])
+    pl.ylim([-0.05, 1.05])
+    pl.xlabel('False Positive Rate')
+    pl.ylabel('True Positive Rate')
+    pl.title('Receiver operating characteristic')
+    pl.legend(loc="lower right")
+    pl.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Luck')
+    pl.show()
 
 if __name__ == "__main__":
     main()
