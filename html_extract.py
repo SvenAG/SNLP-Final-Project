@@ -1,22 +1,23 @@
-import re
-import json
+""" =================================================================
+HTML Parser
+
+For:
+  CSCI-GA 3033 Statistical Natural Language Processing
+  @ New York University
+  Fall 2013
+================================================================= """
 
 import numpy as np
 import pandas as p
 
+import re
+import json
+
 from unidecode import unidecode
 from boilerpipe.extract import Extractor
 from bs4 import BeautifulSoup
-import nltk
 
 tags = ['title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'p']
-
-def visible_text(element):
-    if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
-        return ''
-    result = re.sub('<!--.*-->|\r|\n', '', str(element), flags=re.DOTALL)
-    result = re.sub('\s{2,}|&nbsp;', ' ', result)
-    return result
 
 def main():
     training_data = np.array(p.read_table('../data/train.tsv'))
@@ -28,7 +29,6 @@ def main():
 
     for i, page in enumerate(all_data):
         if i != -1:
-        #if page[1] == 4042:
             if i%100 == 0:
                 print i
 
@@ -43,6 +43,7 @@ def main():
                 content = f.read()
                 soup = BeautifulSoup(content, 'lxml')
 
+            # break up the URL by . / \ and : to make some words from it
             url = page[0]
             url = re.sub(r"[./\\:]", ' ', url)
             extracted['url'] = [url]
@@ -125,7 +126,6 @@ def main():
             print >>output, json.dumps(extracted)
             #print json.dumps(extracted)
 
-
 def clean(incoming):
     incoming = unicode(incoming)
     incoming = unidecode(incoming)
@@ -133,6 +133,12 @@ def clean(incoming):
     incoming = incoming.strip()
     return incoming
 
+def visible_text(element):
+    if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+        return ''
+    result = re.sub('<!--.*-->|\r|\n', '', str(element), flags=re.DOTALL)
+    result = re.sub('\s{2,}|&nbsp;', ' ', result)
+    return result
 
 
 if __name__ == "__main__":
