@@ -12,7 +12,7 @@ import pandas as p
 import numpy as npy
 import scipy
 import pylab as pl
-from sklearn import linear_model, cross_validation
+from sklearn import linear_model, cross_validation, ensemble
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.metrics import roc_curve, auc, metrics
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
@@ -31,16 +31,17 @@ def main():
     modelType = "notext"         # choice between: "notext", "boilerplate_counter", "boilerplate_tfidf"
     cv_folds = 10                           # number of cross validation folds
     error_analysis = True                   # print confusion matrix
-    leaderboard_test = False                 # generate output for the leaderboard
+    leaderboard_test = True                 # generate output for the leaderboard
 
     # ----------------------------------------------------------
     # Prepare the Data
     # ----------------------------------------------------------
     training_data = npy.array(p.read_table('../data/train_updated.tsv'))
     testing_data = npy.array(p.read_table('../data/test.tsv'))
-
     all_data = npy.vstack([training_data[:,0:26], testing_data])
-
+    print(training_data.shape)
+    print(testing_data.shape)
+    #print(all_data.shape)
     training_length = training_data.shape[0]
 
     # 0 => "url"                       7 => "commonlinkratio_2"    14 => "hasDomainLink"       21 => "non_markup_alphanum_characters"
@@ -52,53 +53,85 @@ def main():
     # 6 => "commonlinkratio_1"        13 => "frameTagRatio"        20 => "news_front_page"
 
     # get the target variable and set it as Y so we can predict it
-    # Y = training_data[:,-1]
+    print(training_data[:,-1].shape)
+    print(training_data[:,-1])
+    Y = training_data[:,-1].astype(int)
+
+##    # not all data is numerical, so we'll have to convert those fields
+##    # fix "is_news":
+##    training_data[:,17] = [0 if x == "?" else 1 for x in training_data[:,17]]
+##
+##    # fix "news_front_page":
+##    training_data[:,20] = [999 if x == "?" else x for x in training_data[:,20]]
+##    training_data[:,20] = [1 if x == "1" else x for x in training_data[:,20]]
+##    training_data[:,20] = [0 if x == "0" else x for x in training_data[:,20]]
+##
+##    # fix "alchemy category":
+##    training_data[:,3] = [0 if x=="arts_entertainment" else x for x in training_data[:,3]]
+##    training_data[:,3] = [1 if x=="business" else x for x in training_data[:,3]]
+##    training_data[:,3] = [2 if x=="computer_internet" else x for x in training_data[:,3]]
+##    training_data[:,3] = [3 if x=="culture_politics" else x for x in training_data[:,3]]
+##    training_data[:,3] = [4 if x=="gaming" else x for x in training_data[:,3]]
+##    training_data[:,3] = [5 if x=="health" else x for x in training_data[:,3]]
+##    training_data[:,3] = [6 if x=="law_crime" else x for x in training_data[:,3]]
+##    training_data[:,3] = [7 if x=="recreation" else x for x in training_data[:,3]]
+##    training_data[:,3] = [8 if x=="religion" else x for x in training_data[:,3]]
+##    training_data[:,3] = [9 if x=="science_technology" else x for x in training_data[:,3]]
+##    training_data[:,3] = [10 if x=="sports" else x for x in training_data[:,3]]
+##    training_data[:,3] = [11 if x=="unknown" else x for x in training_data[:,3]]
+##    training_data[:,3] = [12 if x=="weather" else x for x in training_data[:,3]]
+##    training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
+
 
     # not all data is numerical, so we'll have to convert those fields
     # fix "is_news":
-    training_data[:,17] = [0 if x == "?" else 1 for x in training_data[:,17]]
+    all_data[:,17] = [0 if x == "?" else 1 for x in all_data[:,17]]
 
     # fix "news_front_page":
-    training_data[:,20] = [999 if x == "?" else x for x in training_data[:,20]]
-    training_data[:,20] = [1 if x == "1" else x for x in training_data[:,20]]
-    training_data[:,20] = [0 if x == "0" else x for x in training_data[:,20]]
+    all_data[:,20] = [999 if x == "?" else x for x in all_data[:,20]]
+    all_data[:,20] = [1 if x == "1" else x for x in all_data[:,20]]
+    all_data[:,20] = [0 if x == "0" else x for x in all_data[:,20]]
 
     # fix "alchemy category":
-    training_data[:,3] = [0 if x=="arts_entertainment" else x for x in training_data[:,3]]
-    training_data[:,3] = [1 if x=="business" else x for x in training_data[:,3]]
-    training_data[:,3] = [2 if x=="computer_internet" else x for x in training_data[:,3]]
-    training_data[:,3] = [3 if x=="culture_politics" else x for x in training_data[:,3]]
-    training_data[:,3] = [4 if x=="gaming" else x for x in training_data[:,3]]
-    training_data[:,3] = [5 if x=="health" else x for x in training_data[:,3]]
-    training_data[:,3] = [6 if x=="law_crime" else x for x in training_data[:,3]]
-    training_data[:,3] = [7 if x=="recreation" else x for x in training_data[:,3]]
-    training_data[:,3] = [8 if x=="religion" else x for x in training_data[:,3]]
-    training_data[:,3] = [9 if x=="science_technology" else x for x in training_data[:,3]]
-    training_data[:,3] = [10 if x=="sports" else x for x in training_data[:,3]]
-    training_data[:,3] = [11 if x=="unknown" else x for x in training_data[:,3]]
-    training_data[:,3] = [12 if x=="weather" else x for x in training_data[:,3]]
-    training_data[:,3] = [999 if x=="?" else x for x in training_data[:,3]]
+    all_data[:,3] = [0 if x=="arts_entertainment" else x for x in all_data[:,3]]
+    all_data[:,3] = [1 if x=="business" else x for x in all_data[:,3]]
+    all_data[:,3] = [2 if x=="computer_internet" else x for x in all_data[:,3]]
+    all_data[:,3] = [3 if x=="culture_politics" else x for x in all_data[:,3]]
+    all_data[:,3] = [4 if x=="gaming" else x for x in all_data[:,3]]
+    all_data[:,3] = [5 if x=="health" else x for x in all_data[:,3]]
+    all_data[:,3] = [6 if x=="law_crime" else x for x in all_data[:,3]]
+    all_data[:,3] = [7 if x=="recreation" else x for x in all_data[:,3]]
+    all_data[:,3] = [8 if x=="religion" else x for x in all_data[:,3]]
+    all_data[:,3] = [9 if x=="science_technology" else x for x in all_data[:,3]]
+    all_data[:,3] = [10 if x=="sports" else x for x in all_data[:,3]]
+    all_data[:,3] = [11 if x=="unknown" else x for x in all_data[:,3]]
+    all_data[:,3] = [12 if x=="weather" else x for x in all_data[:,3]]
+    all_data[:,3] = [999 if x=="?" else x for x in all_data[:,3]]
 
-    Y = training_data[:,-1].astype(int)
+
+
+
+
+
 
     if modelType == "notext":
-#        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
- #       X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
-#for SVM
-        #X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
-        #X_test = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+#for SVM rfecv
+#        X = training_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+        X_all = all_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 15, 18, 19, 21, 22, 23, 24])]
+        X = X_all[0:training_length]
+        X_test = X_all[training_length:]
+
+
 #for log rfecv
-        X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
+        #X = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
         #X_test = training_data[:,list([5,11,13,14,15,18,19,21,22,23])]
 
+#        lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
+#        svc = SVC(kernel = "linear")
 
-        """
-        X_all = all_data[:,list([3, 5, 6, 7, 8, 9, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])]
-        X = X_all[0:training_length]
-        X_test = X_all[training_length:]"""
 
-        lr = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
-        svc = SVC(kernel = "linear")
+        rf = ensemble.RandomForestClassifier(n_estimators = 500)
+
     elif modelType == "boilerplate_counter":
         X_all = all_data[:,2]
 
@@ -123,14 +156,16 @@ def main():
 
         lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
 
-    print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(lr, X, Y, cv=cv_folds, scoring='roc_auc')))
+    print ("\nModel Type: ", modelType, "\nROC AUC: ", npy.mean(cross_validation.cross_val_score(rf, X, Y, cv=cv_folds, scoring='roc_auc')))
 
 
     #roc_plotter(X, Y)
 
     if leaderboard_test:
-        lr.fit(X, Y)
-        prediction = lr.predict(X_test)
+        #lr.fit(X, Y)
+        rf.fit(X,Y)
+        #prediction = lr.predict(X_test)
+        prediction = rf.predict(X_test)
         output = npy.array(testing_data[:,1])
         output = npy.vstack((output, prediction)).T
         predictions = p.DataFrame(data=output, columns=['urlid', 'label'])
