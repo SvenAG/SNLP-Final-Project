@@ -33,10 +33,10 @@ def main():
 
     # DATA IMPORT ###################################################################
     # import the data
-    training_data = np.array(p.read_table('../data/train.tsv'))
+    training_data = np.array(p.read_table('../data/train_old.tsv'))
     testing_data = np.array(p.read_table('../data/test.tsv'))
     
-    Y = training_data[:, 26]    # get the outcome labels
+    Y = training_data[:, -1]    # get the outcome labels
 
     # length of training data
     training_length = training_data.shape[0]
@@ -101,7 +101,7 @@ def main():
             # fit a logistic regression for this tag
             lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
             
-            # svd with 100 components on the tfidf output
+            # # svd with 100 components on the tfidf output
             # truncatedSVD = decomposition.TruncatedSVD(n_components=100, algorithm='randomized', n_iterations=5)  #Won't run for 1000
             # truncatedSVD.fit(X_all)
             # X_all = truncatedSVD.transform(X_all)
@@ -116,7 +116,7 @@ def main():
             # X_before_gs = np.array(X, copy=True)
             # X_test_before_gs = np.array(X_test, copy=True)
 
-            # print "Shape of X before GS: " + str(X.shape)
+            print "Shape of X before GS: " + str(X.shape)
 
             # selector = RFECV(lr, step=1, cv=5)
             # selector = selector.fit(X, Y)
@@ -221,28 +221,33 @@ def main():
         X = X.astype(float)
         Y = Y.astype(int)
 
-        selector = RFECV(lr, step=1, cv=5)
-        selector = selector.fit(X, Y)
-        selected_cols = []
-        for s, b in enumerate(selector.support_):
-            if b:
-                selected_cols.append(s)
+        # selector = RFECV(lr, step=1, cv=5)
+        # selector = selector.fit(X, Y)
+        # selected_cols = []
+        # for s, b in enumerate(selector.support_):
+        #     if b:
+        #         selected_cols.append(s)
 
-        X = X[:,list(selected_cols)]
-        X_test = X_test[:,list(selected_cols)]
+        # X = X[:,list(selected_cols)]
+        # X_test = X_test[:,list(selected_cols)]
 
-        lr.fit(X, Y)
+        cv = cross_validation.StratifiedKFold(Y, n_folds=10)
+        for i, (train, test) in enumerate(cv):
+            if i == 0:
+                # fit Logistic Regression model
+                lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+                lr.fit(X[train], Y[train])
 
-        # predict the test data
-        prediction = lr.predict(X_test)
+                # predict the test data
+                prediction = lr.predict(X_test)
 
-        # output will be url_id, predicition
-        output = np.array(testing_data[:,1])
-        output = np.vstack((output, prediction)).T
-        predictions = p.DataFrame(data=output, columns=['urlid', 'label'])
+                # output will be url_id, predicition
+                output = np.array(testing_data[:,1])
+                output = np.vstack((output, prediction)).T
+                predictions = p.DataFrame(data=output, columns=['urlid', 'label'])
 
-        # save the output
-        predictions.to_csv('../data/output_Rlr_both100.csv', index=False)
+                # save the output
+                predictions.to_csv('../data/output_fiddle.csv', index=False)
 
 def roc_plotter(X_set, Y_set):
     mean_tpr = 0.0
