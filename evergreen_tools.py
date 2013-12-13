@@ -26,7 +26,7 @@ from sklearn import linear_model, cross_validation, metrics
 #from sklearn.metrics import roc_curve, auc, metrics
 
 
-def roc_plotter(m1, folds, verbose, X, Y):
+def roc_plotter(m1, folds, verbose, toFile, filename, X, Y):
     mean_tpr = 0.0
     mean_fpr = np.linspace(0, 1, 100)
 
@@ -65,7 +65,7 @@ def roc_plotter(m1, folds, verbose, X, Y):
     pl.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Random')
     pl.show()
 
-def leaderboard_ouput(m1, X, Y, X_test, urlids, rfecv, filename):
+def leaderboard_ouput(m1, X, Y, X_test, urlids, filename):
     X = X.astype(float)
     X_test = X_test.astype(float)
     Y = Y.astype(int)
