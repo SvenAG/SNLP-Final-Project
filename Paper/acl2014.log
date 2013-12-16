@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  5 DEC 2013 00:01
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  11 DEC 2013 22:58
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -38,70 +38,119 @@ Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
 \symlasy=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
 (Font)                  U/lasy/m/n --> U/lasy/b/n on input line 47.
-) (./acl2014.aux)
+)
+(/usr/local/texlive/2013/texmf-dist/tex/latex/tools/multicol.sty
+Package: multicol 2011/06/27 v1.7a multicolumn formatting (FMi)
+\c@tracingmulticols=\count87
+\mult@box=\box26
+\multicol@leftmargin=\dimen103
+\c@unbalance=\count88
+\c@collectmore=\count89
+\doublecol@number=\count90
+\multicoltolerance=\count91
+\multicolpretolerance=\count92
+\full@width=\dimen104
+\page@free=\dimen105
+\premulticols=\dimen106
+\postmulticols=\dimen107
+\multicolsep=\skip44
+\multicolbaselineskip=\skip45
+\partial@page=\box27
+\last@line=\box28
+\mult@rightbox=\box29
+\mult@grightbox=\box30
+\mult@gfirstbox=\box31
+\mult@firstbox=\box32
+\@tempa=\box33
+\@tempa=\box34
+\@tempa=\box35
+\@tempa=\box36
+\@tempa=\box37
+\@tempa=\box38
+\@tempa=\box39
+\@tempa=\box40
+\@tempa=\box41
+\@tempa=\box42
+\@tempa=\box43
+\@tempa=\box44
+\@tempa=\box45
+\@tempa=\box46
+\@tempa=\box47
+\@tempa=\box48
+\@tempa=\box49
+\c@columnbadness=\count93
+\c@finalcolumnbadness=\count94
+\last@try=\dimen108
+\multicolovershoot=\dimen109
+\multicolundershoot=\dimen110
+\mult@nat@firstbox=\box50
+\colbreak@box=\box51
+\multicol@sort@counter=\count95
+)
+(./acl2014.aux)
 \openout1 = `acl2014.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 108.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 111.
 
  (/usr/local/texlive/2013/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 109.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 112.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 109.
+(Font)              <12> on input line 112.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 109.
+(Font)              <8> on input line 112.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 109.
-LaTeX Font Info:    Try loading font information for U+lasy on input line 109.
-
+(Font)              <6> on input line 112.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 112.
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 109.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 109.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 112.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 112.
 
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 133.
- (./acl2014.bbl) [1{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/p
-dftex.map}
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 137.
+
+No file acl2014.bbl.
+[1{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 
 ]
 (./acl2014.aux) ) 
 Here is how much of TeX's memory you used:
- 462 strings out of 493315
- 5873 string characters out of 6137904
- 58026 words of memory out of 5000000
- 3952 multiletter control sequences out of 15000+600000
- 19333 words of font info for 44 fonts, out of 8000000 for 9000
+ 552 strings out of 493315
+ 7263 string characters out of 6137904
+ 61393 words of memory out of 5000000
+ 4041 multiletter control sequences out of 15000+600000
+ 17748 words of font info for 42 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 22i,9n,19p,162b,256s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 22i,9n,19p,162b,260s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/base/8r.en
 c}</usr/local/texlive/2013/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/
 local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texl
 ive/2013/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2013/t
 exmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on acl2014.pdf (1 page, 49384 bytes).
+Output written on acl2014.pdf (1 page, 51194 bytes).
 PDF statistics:
  25 PDF objects out of 1000 (max. 8388607)
  17 compressed objects within 1 object stream
