@@ -10,7 +10,7 @@ For:
 import numpy as np
 import scipy
 import pandas as p
-import pylab as pl
+#import pylab as pl
 
 import re
 import json
@@ -28,28 +28,33 @@ def main():
     logisticRegressionPCA = False
     logisticRegressionRFECV = False
 
-    randomForestScores = False
+    randomForestScores = True
     randomForestPCA = True
     randomForestRFECV = False
 
     ensembleRFECV = False
+
+
+    model_type = ""
+    if logisticRegressionScores:
+        model_type = model_type + "_lr"
+    if randomForestScores:
+        model_type = model_type + "_rf"
+
+    roc_data = False
+    roc_data_filename = "html_cv" + model_type + ".csv"
 
     roc_plotter = False
     # roc_toFile = False
     # roc_filename = data_type + "_" + model_type + ".jpg"
 
     leaderboard_output = True
-    model_type = ""
-    if logisticRegressionScores:
-        model_type = model_type + "_lr"
-    if randomForestScores:
-        model_type = model_type + "_rf"
-    leaderboard_filename = "html" + model_type + ".csv"
+    leaderboard_filename = "html_non-fc_" + model_type + ".csv"
 
     # which fields from the html data do we care about?
     tags = ['url', 'title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'meta_description', 'meta_keywords', 'boilerplate', 'summary']
     # tags =['url', 'title', 'meta_keywords', 'meta_keywords', 'summary', 'boilerplate', 'img']
-    # tags = ['url', 'summary', 'meta_kewords+title', 'url+summary+img+title+url']
+    # tags = ['url', 'boilerplate', 'meta_keywords+title', 'url+boilerplate+img+title+meta_keywords+meta_description']
     # tags = ['url', 'title']
     # END SETTINGS ###################################################################
 
@@ -185,12 +190,12 @@ def main():
             if i == 0:
                 #scores = np.array(lr.predict(X[list(predict_urls),:]))
                 scores = np.array(s)
-                scores_test = np.array(lr.predict(X_test))
+                scores_test = np.array(lr.predict_proba(X_test)[:, -1])
             else:
                 scores = np.vstack((scores, s))
-                scores_test = np.vstack((scores_test, lr.predict(X_test)))
+                scores_test = np.vstack((scores_test, lr.predict_proba(X_test)[:, -1]))
 
-            print "\tLR AUC ROC: ", str(np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc')))
+            #print "\tLR AUC ROC: ", str(np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc')))
 
         # RANDOM FOREST
         if randomForestScores:
@@ -241,24 +246,23 @@ def main():
             #rf.fit(X, Y)
 
             # get the score from the logistic regression for training and test
-            if i == 0:
-                #scores = np.array(lr.predict(X[list(predict_urls),:]))
+            if i == 0 and not logisticRegressionScores:
                 scores = np.array(s)
-                #scores_test = np.array(lr.predict(X_test))
+                scores_test = np.array(rf.predict_proba(X_test)[:, -1])
             else:
                 scores = np.vstack((scores, s))
-                #scores_test = np.vstack((scores_test, lr.predict(X_test)))
+                scores_test = np.vstack((scores_test, rf.predict_proba(X_test)[:, -1]))
 
 
             # fit a random forest
-            rf.fit(X, Y)
+            # rf.fit(X, Y)
 
             # get the scores of the random forest for training and test
             # if i == 0 and not logisticRegressionScores:
-            #     scores = np.array(rf.predict(X[list(predict_urls),:]))
+            #     scores = np.array(rf.predict(X))
             #     scores_test = np.array(rf.predict(X_test))
             # else:
-            #     scores = np.vstack((scores, rf.predict(X[list(predict_urls),:])))
+            #     scores = np.vstack((scores, rf.predict(X)))
             #     scores_test = np.vstack((scores_test, rf.predict(X_test)))
 
             #print "\tRF AUC ROC: ", str(np.mean(cross_validation.cross_val_score(rf, X, Y, cv=10, scoring='roc_auc')))
@@ -300,8 +304,11 @@ def main():
 
 
 
-    if roc_plotter:
-        evergreen_tools.roc_plotter(lr, 10, False, roc_toFile, roc_filename, X, Y)
+    # if roc_plotter:
+    #     evergreen_tools.roc_plotter(lr, 10, False, roc_toFile, roc_filename, X, Y)
+
+    if roc_data:
+        evergreen_tools.roc_data(m1, X, Y, roc_data_filename)
 
     if leaderboard_output:
         evergreen_tools.leaderboard_ouput(lr, X, Y, X_test, testing_data[:,1], leaderboard_filename)

@@ -10,7 +10,7 @@ For:
 import pandas as p
 import numpy as np
 import scipy as sp
-import pylab as pl
+#import pylab as pl
 
 from sklearn import linear_model, ensemble, cross_validation, metrics, svm
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -25,20 +25,23 @@ def main():
     # ----------------------------------------------------------
     # Settings
     # ----------------------------------------------------------
-    data_type = "extracted"                # choice between: "extracted", "boilerplate"
+    data_type = "boilerplate"                # choice between: "extracted", "boilerplate"
     boilerplate_type = "tf-idf"             # choice between: "frequency", "tf-idf"
-    model_type = "random_forest"
+    model_type = "logistic_regression"
     cv_folds = 20                           # number of cross validation folds
     
     rfecv = False
 
     error_analysis = False
 
-    roc_plotter = False
-    roc_toFile = False
-    roc_filename = data_type + "_" + model_type + ".jpg"
+    # roc_plotter = False
+    # roc_toFile = False
+    # roc_filename = data_type + "_" + model_type + ".jpg"
 
-    leaderboard_output = True
+    roc_data = False
+    roc_data_filename = data_type + "_" + model_type + ".csv"
+
+    leaderboard_output = False
     leaderboard_filename = data_type + "_" + model_type + ".csv"
 
 
@@ -115,7 +118,7 @@ def main():
             counter.fit(X_all)
             X_all = counter.transform(X_all)
         elif boilerplate_type == "tf-idf":
-            tfidf = TfidfVectorizer(min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 2), use_idf=1, smooth_idf=1, sublinear_tf=1)
+            tfidf = TfidfVectorizer(min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 4), use_idf=1, smooth_idf=1, sublinear_tf=1)
             tfidf.fit(X_all)
             X_all = tfidf.transform(X_all)
 
@@ -152,10 +155,13 @@ def main():
     X = X.astype(float)
     Y = Y.astype(int)
 
-    #print ("\nData Type: ", data_type, "\nModel Type: ", model_type, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(m1, X, Y, cv=cv_folds, scoring='roc_auc')))
+    print ("\nData Type: ", data_type, "\nModel Type: ", model_type, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(m1, X, Y, cv=cv_folds, scoring='roc_auc')))
 
-    if roc_plotter:
-        evergreen_tools.roc_plotter(m1, 10, False, roc_toFile, roc_filename, X, Y)
+    # if roc_plotter:
+    #     evergreen_tools.roc_plotter(m1, 10, False, roc_toFile, roc_filename, X, Y)
+
+    if roc_data:
+        evergreen_tools.roc_data(m1, X, Y, roc_data_filename)
 
     if leaderboard_output:
         evergreen_tools.leaderboard_ouput(m1, X, Y, X_test, testing_data[:,1], leaderboard_filename)
