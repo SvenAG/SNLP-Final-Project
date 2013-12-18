@@ -1,0 +1,61 @@
+Features before RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Features after RFECV: [3, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  logistic_regression 
+ROC AUC:  0.66562047966
+File: features_kmeans10
+
+
+
+
+Features before RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Features after RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  logistic_regression 
+ROC AUC:  0.676978612776
+File: features_kmeans12
+
+
+
+
+
+
+Features before RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Features after RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  logistic_regression 
+ROC AUC:  0.692642734543
+File: features_kmeans15
+
+
+
+Features after RFECV: [3, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  random_forest 
+ROC AUC:  0.827754358481
+File: features_kmeans15
+
+
+
+
+Features after RFECV: [3, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  random_forest 
+ROC AUC:  0.8297501901
+File: features_kmeans10
+
+
+
+Features before RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  random_forest 
+ROC AUC:  0.826958596488
+File: features_kmeans12
+
+
+
+Features before RFECV: [3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+Data Type:  extracted 
+Model Type:  random_forest 
+ROC AUC:  0.827909271009
+File: features_kmeans12
