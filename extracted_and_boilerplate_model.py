@@ -27,10 +27,10 @@ def main():
     # ----------------------------------------------------------
     data_type = "extracted"                # choice between: "extracted", "boilerplate"
     boilerplate_type = "tf-idf"             # choice between: "frequency", "tf-idf"
-    model_type = "logistic_regression"
-    cv_folds = 10                           # number of cross validation folds
+    model_type = "random_forest"
+    cv_folds = 20                           # number of cross validation folds
     
-    rfecv = True
+    rfecv = False
 
     error_analysis = False
 
@@ -38,7 +38,7 @@ def main():
     roc_toFile = False
     roc_filename = data_type + "_" + model_type + ".jpg"
 
-    leaderboard_output = False
+    leaderboard_output = True
     leaderboard_filename = data_type + "_" + model_type + ".csv"
 
 
@@ -46,7 +46,7 @@ def main():
     # Prepare the Data
     # ----------------------------------------------------------
     # import the data
-    training_data = np.array(p.read_table('../data/train_old.tsv'))
+    training_data = np.array(p.read_table('../data/train.tsv'))
     testing_data = np.array(p.read_table('../data/test.tsv'))
     
     Y = training_data[:, -1]    # get the outcome labels
@@ -105,7 +105,7 @@ def main():
         if model_type == "logistic_regression":
             m1 = linear_model.LogisticRegression(penalty='l1', dual=False, tol=0.0001, class_weight=None, random_state=None)
         elif model_type == "random_forest":
-            m1 = ensemble.RandomForestClassifier(n_estimators = 500)
+            m1 = ensemble.RandomForestClassifier(n_estimators=1000,verbose=2,n_jobs=20,min_samples_split=5,random_state=1034324)
 
     elif data_type == "boilerplate":
         X_all = all_data[:,2]
@@ -115,17 +115,18 @@ def main():
             counter.fit(X_all)
             X_all = counter.transform(X_all)
         elif boilerplate_type == "tf-idf":
-            tfidf = TfidfVectorizer(min_df=1, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 1), use_idf=1, smooth_idf=1, sublinear_tf=1)
+            tfidf = TfidfVectorizer(min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 2), use_idf=1, smooth_idf=1, sublinear_tf=1)
             tfidf.fit(X_all)
             X_all = tfidf.transform(X_all)
 
-        X = X_all[0:training_length,:]
-        X_test = X_all[training_length:,:]
+        X = X_all[:training_length]
+        X_test = X_all[training_length:]
 
         if model_type == "logistic_regression":
-            m1 = linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, class_weight=None, random_state=None)
+            m1 = linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1, fit_intercept=True, intercept_scaling=1.0, class_weight=None, random_state=None)
         elif model_type == "random_forest":
             m1 = ensemble.RandomForestClassifier(n_estimators = 500)
+
 
     X = X.astype(float)
     Y = Y.astype(int)
@@ -151,7 +152,7 @@ def main():
     X = X.astype(float)
     Y = Y.astype(int)
 
-    print ("\nData Type: ", data_type, "\nModel Type: ", model_type, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(m1, X, Y, cv=cv_folds, scoring='roc_auc')))
+    #print ("\nData Type: ", data_type, "\nModel Type: ", model_type, "\nROC AUC: ", np.mean(cross_validation.cross_val_score(m1, X, Y, cv=cv_folds, scoring='roc_auc')))
 
     if roc_plotter:
         evergreen_tools.roc_plotter(m1, 10, False, roc_toFile, roc_filename, X, Y)

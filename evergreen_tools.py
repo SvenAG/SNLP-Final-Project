@@ -71,7 +71,7 @@ def leaderboard_ouput(m1, X, Y, X_test, urlids, filename):
     Y = Y.astype(int)
 
     m1.fit(X, Y)
-    prediction = m1.predict(X_test)
+    prediction = m1.predict_proba(X_test)[:,1]
     output = np.array(urlids)
     output = np.vstack((output, prediction)).T
     predictions = p.DataFrame(data=output, columns=['urlid', 'label'])

@@ -28,11 +28,11 @@ def main():
     logisticRegressionPCA = False
     logisticRegressionRFECV = False
 
-    randomForestScores = True
+    randomForestScores = False
     randomForestPCA = True
     randomForestRFECV = False
 
-    ensembleRFECV = True
+    ensembleRFECV = False
 
     roc_plotter = False
     # roc_toFile = False
@@ -49,7 +49,8 @@ def main():
     # which fields from the html data do we care about?
     tags = ['url', 'title', 'h1', 'h2', 'h3', 'strong', 'b', 'a', 'img', 'meta_description', 'meta_keywords', 'boilerplate', 'summary']
     # tags =['url', 'title', 'meta_keywords', 'meta_keywords', 'summary', 'boilerplate', 'img']
-    # tags = ['url', 'meta_kewords+title', 'summary+img+title+url']
+    # tags = ['url', 'summary', 'meta_kewords+title', 'url+summary+img+title+url']
+    # tags = ['url', 'title']
     # END SETTINGS ###################################################################
 
 
@@ -75,12 +76,12 @@ def main():
     extracted = np.array(all_data[:, 1])
 
     # get an array of all the indices in the training data
-    index_array = np.arange(url_ids.size)
+    # index_array = np.arange(url_ids.size)
     # shuffle these indices
-    np.random.shuffle(index_array)
+    # np.random.shuffle(index_array)
     # split the shuffled indices 50-50 and set them aside to fit and predict
-    fit_urls = index_array[0:5000]
-    predict_urls = index_array[5000:]
+    # fit_urls = index_array[0:7395]
+    # predict_urls = index_array[0:7395]
 
 
     print "Extracting tags..."
@@ -121,7 +122,7 @@ def main():
         X_all = extracted[:, col]   # get the text for this tag
         
         # fit a tfidf on all the text for that tag
-        tfidf = TfidfVectorizer(min_df=3, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,2}', ngram_range=(1, 2), use_idf=1, smooth_idf=1, sublinear_tf=1)
+        tfidf = TfidfVectorizer(min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 2), use_idf=1, smooth_idf=1, sublinear_tf=1)
         tfidf.fit(X_all)
         X_all = tfidf.transform(X_all)
 
@@ -135,7 +136,7 @@ def main():
         if logisticRegressionScores:
             print "Logistic Regression..."
             # fit a logistic regression for this tag
-            lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+            lr = linear_model.LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1, fit_intercept=True, intercept_scaling=1.0, class_weight=None, random_state=None)
             
 
             # svd with 100 components on the tfidf output
@@ -171,18 +172,25 @@ def main():
             X = X.astype(float)
             Y = Y.astype(int)
 
-            lr.fit(X[list(fit_urls),:], Y[list(fit_urls)])
-            
+            s = np.zeros(len(Y))
+
+            for train_idx, test_idx in cross_validation.KFold(len(Y), 10):
+                lr.fit(X[train_idx], Y[train_idx])
+                
+                s[list(test_idx)] = lr.predict_proba(X[test_idx])[:, -1]
+                
+            lr.fit(X, Y)
+
             # get the score from the logistic regression for training and test
             if i == 0:
-                scores = np.array(lr.predict(X[list(predict_urls),:]))
+                #scores = np.array(lr.predict(X[list(predict_urls),:]))
+                scores = np.array(s)
                 scores_test = np.array(lr.predict(X_test))
             else:
-                scores = np.vstack((scores, lr.predict(X[list(predict_urls),:])))
+                scores = np.vstack((scores, s))
                 scores_test = np.vstack((scores_test, lr.predict(X_test)))
 
-            #print "\tLR AUC ROC: ", str(np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc')))
-
+            print "\tLR AUC ROC: ", str(np.mean(cross_validation.cross_val_score(lr, X, Y, cv=10, scoring='roc_auc')))
 
         # RANDOM FOREST
         if randomForestScores:
@@ -222,16 +230,36 @@ def main():
             X = X.astype(float)
             Y = Y.astype(int)
 
+
+            s = np.zeros(len(Y))
+
+            for train_idx, test_idx in cross_validation.KFold(len(Y), 10):
+                rf.fit(X[train_idx], Y[train_idx])
+                
+                s[list(test_idx)] = rf.predict_proba(X[test_idx])[:, -1]
+                
+            #rf.fit(X, Y)
+
+            # get the score from the logistic regression for training and test
+            if i == 0:
+                #scores = np.array(lr.predict(X[list(predict_urls),:]))
+                scores = np.array(s)
+                #scores_test = np.array(lr.predict(X_test))
+            else:
+                scores = np.vstack((scores, s))
+                #scores_test = np.vstack((scores_test, lr.predict(X_test)))
+
+
             # fit a random forest
-            rf.fit(X[list(fit_urls),:], Y[list(fit_urls)])
+            rf.fit(X, Y)
 
             # get the scores of the random forest for training and test
-            if i == 0 and not logisticRegressionScores:
-                scores = np.array(rf.predict(X[list(predict_urls),:]))
-                scores_test = np.array(rf.predict(X_test))
-            else:
-                scores = np.vstack((scores, rf.predict(X[list(predict_urls),:])))
-                scores_test = np.vstack((scores_test, rf.predict(X_test)))
+            # if i == 0 and not logisticRegressionScores:
+            #     scores = np.array(rf.predict(X[list(predict_urls),:]))
+            #     scores_test = np.array(rf.predict(X_test))
+            # else:
+            #     scores = np.vstack((scores, rf.predict(X[list(predict_urls),:])))
+            #     scores_test = np.vstack((scores_test, rf.predict(X_test)))
 
             #print "\tRF AUC ROC: ", str(np.mean(cross_validation.cross_val_score(rf, X, Y, cv=10, scoring='roc_auc')))
 
@@ -240,19 +268,21 @@ def main():
     # flip the scores so we have a row for each URL and a column for each score (# rows = # urls, # cols = # tags * 2(lr and rf))
     X = scores.T
     X_test = scores_test.T
-    Y = Y[list(predict_urls)]
+    Y = Y
     
     print "\nShape of model scores: " + str(scores.shape)
     
     print "Training done."
     # END MODELS ###################################################################
 
+    print "\n==========================================================\n"
 
     # COMBINE MODELS ###################################################################
-    print "\nUsing tag-models as features in new models..."
+    print "Using tag-models as features in new models..."
 
     # make a new logistic regression
-    lr = linear_model.LogisticRegression(penalty='l2', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    #lr = linear_model.LogisticRegression(penalty='l1', dual=True, tol=0.0001, class_weight=None, random_state=None)
+    lr = linear_model.LogisticRegression()
 
     if ensembleRFECV:
         selector = RFECV(lr, step=1, cv=5)
