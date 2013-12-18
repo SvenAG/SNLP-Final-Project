@@ -32,7 +32,8 @@ import logging, gensim, bz2
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 def main():
-    output = codecs.open('new_categories_15','w','utf-8')
+    output_train = codecs.open('train_new_categories_12','w','utf-8')
+    output_test = codecs.open('test_new_categories_12','w','utf-8')
     # ----------------------------------------------------------
     # Settings
     # ----------------------------------------------------------
@@ -90,6 +91,7 @@ def main():
     Y = training_data[:,-1].astype(int)
 
     X = training_data[0:,2]
+    Z = testing_data[0:,2]
 
     print "TRAINING DATA EXTRACTED!"
 
@@ -103,7 +105,7 @@ def main():
     X = lsa.fit_transform(X)
     X = Normalizer(copy=False).fit_transform(X)
 
-    km = KMeans(n_clusters=15, init='k-means++', max_iter=100, n_init=1,
+    km = KMeans(n_clusters=12, init='k-means++', max_iter=100, n_init=1,
         verbose=True)
 
     km.fit(X)
@@ -117,10 +119,17 @@ def main():
         print "row %d has label %d"%(row, label) 
         label_m[label].append(row)
 
-        output.write(str(label)+'\n')
+        output_train.write(str(label)+'\n')
 
 
-    output.close()
+    output_train.close()
+
+    Z = tfidf.transform(Z)
+    Z = lsa.fit_transform(Z)
+    Z = Normalizer(copy=False).fit_transform(Z)   
+
+    for i in km.predict(Z):
+        output_test.write(str(i)+'\n')
         
 
 ##############  LDA ###############
