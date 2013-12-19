@@ -17,9 +17,18 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_selection import RFECV
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import *
+from nltk.stem.snowball import EnglishStemmer
+from nltk import word_tokenize
+
 
 import evergreen_tools
 
+
+class StemmingTokenizer(object):
+    def __init__(self):
+        self.stemmer = EnglishStemmer()
+    def __call__(self, doc):
+        return [self.stemmer.stem(t) for t in word_tokenize(doc)]
 
 def main():
     # ----------------------------------------------------------
@@ -118,7 +127,7 @@ def main():
             counter.fit(X_all)
             X_all = counter.transform(X_all)
         elif boilerplate_type == "tf-idf":
-            tfidf = TfidfVectorizer(min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 4), use_idf=1, smooth_idf=1, sublinear_tf=1)
+            tfidf = TfidfVectorizer( tokenizer=StemmingTokenizer(), min_df=3, max_features=None, strip_accents='unicode', analyzer='word', token_pattern=r'\w{1,}', ngram_range=(1, 4), use_idf=1, smooth_idf=1, sublinear_tf=1)
             tfidf.fit(X_all)
             X_all = tfidf.transform(X_all)
 
